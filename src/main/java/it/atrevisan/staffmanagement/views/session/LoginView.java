@@ -1,4 +1,4 @@
-package it.atrevisan.staffmanagement.views;
+package it.atrevisan.staffmanagement.views.session;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H1;
@@ -8,20 +8,16 @@ import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.server.VaadinSession;
-import it.atrevisan.staffmanagement.repository.UserRepository;
 import it.atrevisan.staffmanagement.model.User;
 import it.atrevisan.staffmanagement.service.UserService;
+import it.atrevisan.staffmanagement.views.config.Routes;
 import org.mindrot.jbcrypt.BCrypt;
 
-@Route("login")
+@Route(Routes.LOGIN)
 @PageTitle("Login")
 public class LoginView extends VerticalLayout {
 
-    private final UserService userService;
-
     public LoginView(UserService userService) {
-        this.userService = userService;
 
         setSizeFull();
         setAlignItems(Alignment.CENTER);
@@ -40,7 +36,7 @@ public class LoginView extends VerticalLayout {
             if (user != null && user.isEnabled() &&
                     BCrypt.checkpw(password, user.getPassword())) {
 
-                VaadinSession.getCurrent().setAttribute("user", user);
+                SessionUtils.setSessionUser(user);
                 getUI().ifPresent(ui -> ui.navigate("home"));
 
             } else {

@@ -7,21 +7,22 @@ import it.atrevisan.staffmanagement.views.config.MainLayout;
 import it.atrevisan.staffmanagement.views.config.Routes;
 import it.atrevisan.staffmanagement.views.session.BasicLoggedInView;
 
-@Route(value = Routes.HOME, layout = MainLayout.class)
-public class HomeView extends BasicLoggedInView {
+@Route(value = Routes.CALENDAR, layout = MainLayout.class)
+public class CalendarView extends BasicLoggedInView {
 
-    public HomeView() {
+    public CalendarView() {
         setSizeFull();
         setAlignItems(Alignment.CENTER);
         setJustifyContentMode(JustifyContentMode.CENTER);
         removeAll();
         if(getCurrentUser().isPresent()) {
-            add(new H1("Welcome " + getCurrentUser().get().getUsername()));
+            add(new H1("Calendar"));
         }
     }
 
     @Override
     protected Roles[] getAllowedRoles() {
-        return Roles.values();
+        return new Roles[]{Roles.ADMIN, Roles.HR};
     }
+
 }

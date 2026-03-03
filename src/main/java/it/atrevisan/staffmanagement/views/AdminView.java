@@ -7,21 +7,22 @@ import it.atrevisan.staffmanagement.views.config.MainLayout;
 import it.atrevisan.staffmanagement.views.config.Routes;
 import it.atrevisan.staffmanagement.views.session.BasicLoggedInView;
 
-@Route(value = Routes.HOME, layout = MainLayout.class)
-public class HomeView extends BasicLoggedInView {
+@Route(value = Routes.ADMIN, layout = MainLayout.class)
+public class AdminView extends BasicLoggedInView {
 
-    public HomeView() {
+    public AdminView() {
         setSizeFull();
         setAlignItems(Alignment.CENTER);
         setJustifyContentMode(JustifyContentMode.CENTER);
         removeAll();
         if(getCurrentUser().isPresent()) {
-            add(new H1("Welcome " + getCurrentUser().get().getUsername()));
+            add(new H1("Welcome ADMIN " + getCurrentUser().get().getUsername()));
         }
     }
 
     @Override
     protected Roles[] getAllowedRoles() {
-        return Roles.values();
+        return new Roles[]{Roles.ADMIN};
     }
+
 }
