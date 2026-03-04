@@ -31,8 +31,8 @@ public class AdminView extends BasicLoggedInView {
 
     private final UserService userService;
 
-    private Grid<UserDTO> grid = new Grid<>(UserDTO.class, false);
-    private TextField usernameFilter = new TextField();
+    private final Grid<UserDTO> grid = new Grid<>(UserDTO.class, false);
+    private final TextField usernameFilter = new TextField();
 
     public AdminView(UserService userService) {
         this.userService = userService;
