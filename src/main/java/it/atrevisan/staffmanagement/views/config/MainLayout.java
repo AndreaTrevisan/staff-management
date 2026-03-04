@@ -10,7 +10,7 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.server.VaadinSession;
-import it.atrevisan.staffmanagement.model.User;
+import it.atrevisan.staffmanagement.dto.UserDTO;
 import it.atrevisan.staffmanagement.views.session.SessionUtils;
 
 import java.util.Arrays;
@@ -57,7 +57,7 @@ public class MainLayout extends AppLayout {
         links.setSpacing(false);
         links.setWidthFull();
 
-        User user = SessionUtils.getSessionUser();
+        UserDTO user = SessionUtils.getSessionUser();
 
         // -------------------------
         // AUTHORIZED MENU ITEMS

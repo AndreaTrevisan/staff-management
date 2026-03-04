@@ -8,10 +8,9 @@ import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import it.atrevisan.staffmanagement.model.User;
+import it.atrevisan.staffmanagement.dto.UserDTO;
 import it.atrevisan.staffmanagement.service.UserService;
 import it.atrevisan.staffmanagement.views.config.Routes;
-import org.mindrot.jbcrypt.BCrypt;
 
 @Route(Routes.LOGIN)
 @PageTitle("Login")
@@ -32,10 +31,8 @@ public class LoginView extends VerticalLayout {
             String username = usernameField.getValue();
             String password = passwordField.getValue();
 
-            User user = userService.findByUsername(username).orElse(null);
-            if (user != null && user.isEnabled() &&
-                    BCrypt.checkpw(password, user.getPassword())) {
-
+            if (userService.checkUser(username, password)) {
+                UserDTO user = userService.findByUsername(username).orElse(null);
                 SessionUtils.setSessionUser(user);
                 getUI().ifPresent(ui -> ui.navigate("home"));
 

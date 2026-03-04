@@ -24,7 +24,7 @@ public class SecurityConfig {
                 Set<String> roles = new HashSet<>();
                 roles.add(String.valueOf(Roles.ADMIN));
 
-                repo.saveIfNotExist(DEFAULT_ADMIN_USERNAME, DEFAULT_ADMIN_PASSWORD, roles);
+                repo.createIfNotExist(DEFAULT_ADMIN_USERNAME, DEFAULT_ADMIN_PASSWORD, roles);
             }
         };
     }
