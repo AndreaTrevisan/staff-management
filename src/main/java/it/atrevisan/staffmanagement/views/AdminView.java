@@ -40,7 +40,7 @@ public class AdminView extends BasicLoggedInView {
         setSizeFull();
 
         // =========================
-        // TOP BAR (Filtri + Create)
+        // TOP BAR (Filter + Create)
         // =========================
 
         usernameFilter.setPlaceholder("Filter by username...");
