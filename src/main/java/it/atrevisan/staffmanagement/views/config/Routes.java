@@ -7,4 +7,5 @@ public class Routes {
     public static final String PROFILE = "profile";
     public static final String CALENDAR = "calendar";
     public static final String STAFF = "staff";
+    public static final String CONTRACTS = "contracts";
 }

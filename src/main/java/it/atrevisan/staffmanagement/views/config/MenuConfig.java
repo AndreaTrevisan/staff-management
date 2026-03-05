@@ -34,6 +34,13 @@ public class MenuConfig {
             VaadinIcon.USERS
     );
 
+    public static final MenuItem CONTRACT_ITEM = new MenuItem(
+            Roles.toSet(Roles.ADMIN, Roles.HR),
+            ContractView.class,
+            "Contracts",
+            VaadinIcon.CLIPBOARD_TEXT
+    );
+
     public static final MenuItem USER_PROFILE_ITEM = new MenuItem(
             Roles.toSet(Roles.values()),
             UserProfileView.class,
@@ -45,7 +52,8 @@ public class MenuConfig {
     protected static final MenuItem[] items = {
             HOME_ITEM,
             ADMIN_ITEM,
-            CALENDAR_ITEM,
-            STAFF_ITEM
+            STAFF_ITEM,
+            CONTRACT_ITEM,
+            CALENDAR_ITEM
     };
 }
