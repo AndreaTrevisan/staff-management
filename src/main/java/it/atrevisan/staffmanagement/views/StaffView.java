@@ -32,7 +32,7 @@ public class StaffView extends BasicLoggedInView {
 
         setSizeFull();
 
-        Button createBtn = new Button("New Staff", e -> openCreateDialog());
+        Button createBtn = new Button("Create Person", e -> openCreateDialog());
 
         grid.addComponentColumn(this::buildActions)
                 .setHeader("Actions")
