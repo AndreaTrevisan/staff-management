@@ -24,4 +24,8 @@ public class User extends UpdatableEntity {
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "user_roles")
     private Set<String> roles;
+
+    @OneToOne
+    @JoinColumn(name = "document_id", referencedColumnName = "documentId", unique = true)
+    private Person person;
 }

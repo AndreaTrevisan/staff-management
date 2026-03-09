@@ -3,23 +3,24 @@ package it.atrevisan.staffmanagement.service;
 import it.atrevisan.staffmanagement.dto.UserDTO;
 import it.atrevisan.staffmanagement.mapper.UserMapper;
 import it.atrevisan.staffmanagement.model.User;
+import it.atrevisan.staffmanagement.repository.PersonRepository;
 import it.atrevisan.staffmanagement.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
     
     private final UserRepository userRepository;
-    
-    public UserService(UserRepository userRepository){
-        this.userRepository = userRepository;
-    }
+    private final PersonRepository personRepository;
 
     private static User buildUser(String username, String password, Set<String> roles, boolean enabled) {
         return User.builder()
@@ -30,10 +31,12 @@ public class UserService {
                 .build();
     }
 
+    @Transactional
     public void createUser(String username, String password, Set<String> roles){
         createUser(username, password, roles, true);
     }
-    
+
+    @Transactional
     public void createUser(String username, String password, Set<String> roles, boolean enabled){
         if (!userExists(username)) {
             User user = buildUser(username, password, roles, enabled);
@@ -42,7 +45,8 @@ public class UserService {
             throw new IllegalStateException("User already defined");
         }
     }
-    
+
+    @Transactional
     public void createIfNotExist(String username, String password, Set<String> roles){
         if (!userExists(username)) {
             createUser(username, password, roles);
@@ -65,6 +69,7 @@ public class UserService {
                 .map(UserMapper::map);
     }
 
+    @Transactional
     public void updatePassword(String username, String oldPassword, String newPassword){
         Optional<User> oldUser = userRepository.findByUsername(username);
         if(!oldUser.isPresent()){
@@ -86,6 +91,7 @@ public class UserService {
         return userRepository.findAll().stream().map(UserMapper::map).collect(Collectors.toList());
     }
 
+    @Transactional
     public void deleteUser(String username) {
         userRepository.deleteByUsername(username);
     }

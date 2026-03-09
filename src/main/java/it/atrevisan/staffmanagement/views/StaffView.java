@@ -1,23 +1,175 @@
 package it.atrevisan.staffmanagement.views;
 
-import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.router.Route;
+import it.atrevisan.staffmanagement.dto.PersonDTO;
 import it.atrevisan.staffmanagement.enums.Roles;
+import it.atrevisan.staffmanagement.service.PersonService;
 import it.atrevisan.staffmanagement.views.config.MainLayout;
-import it.atrevisan.staffmanagement.views.config.Routes;
 import it.atrevisan.staffmanagement.views.session.BasicLoggedInView;
 
-@Route(value = Routes.STAFF, layout = MainLayout.class)
+@Route(value = "staff", layout = MainLayout.class)
 public class StaffView extends BasicLoggedInView {
 
-    public StaffView() {
+    private final PersonService personService;
+
+    private final Grid<PersonDTO> grid = new Grid<>(PersonDTO.class,false);
+
+    public StaffView(PersonService personService) {
+
+        this.personService = personService;
+
         setSizeFull();
-        setAlignItems(Alignment.CENTER);
-        setJustifyContentMode(JustifyContentMode.CENTER);
-        removeAll();
-        if(getCurrentUser().isPresent()) {
-            add(new H1("STAFF"));
+
+        Button createBtn = new Button("New Staff", e -> openCreateDialog());
+
+        grid.addColumn(PersonDTO::getName).setHeader("Name").setSortable(true);
+        grid.addColumn(PersonDTO::getSurname).setHeader("Surname").setSortable(true);
+        grid.addColumn(PersonDTO::getDocumentId).setHeader("Document");
+        grid.addColumn(PersonDTO::getEmail).setHeader("Email");
+        grid.addColumn(PersonDTO::getUsername).setHeader("User");
+
+        grid.addComponentColumn(this::buildActions);
+
+        grid.setSizeFull();
+
+        refreshGrid();
+
+        add(createBtn, grid);
+        expand(grid);
+    }
+
+    private void refreshGrid(){
+        grid.setItems(personService.getAllStaff());
+    }
+
+    private HorizontalLayout buildActions(PersonDTO person){
+
+        Button edit = new Button("Edit",
+                e -> openEditDialog(person));
+
+        Button delete = new Button("Delete",
+                e -> {
+                    personService.deletePerson(person.getDocumentId());
+                    refreshGrid();
+                });
+
+        return new HorizontalLayout(edit, delete);
+    }
+
+    private void openCreateDialog(){
+
+        Dialog dialog = buildDialog(null);
+
+        dialog.open();
+    }
+
+    private void openEditDialog(PersonDTO person){
+
+        Dialog dialog = buildDialog(person);
+
+        dialog.open();
+    }
+
+    private Dialog buildDialog(PersonDTO person){
+
+        Dialog dialog = new Dialog();
+
+        TextField document = new TextField("Document");
+        TextField name = new TextField("Name");
+        TextField surname = new TextField("Surname");
+        DatePicker birthDate = new DatePicker("Birth date");
+        TextField email = new TextField("Email");
+        TextField phone = new TextField("Phone");
+        TextField address = new TextField("Address");
+
+        Checkbox createUserFlag = new Checkbox("Create User");
+        Checkbox deleteUserFlag = new Checkbox("Delete User");
+
+        Binder<PersonDTO> binder = new Binder<>(PersonDTO.class);
+
+        /*
+         * BINDINGS + VALIDATIONS
+         */
+        binder.forField(name)
+                .asRequired("Name is required")
+                .bind(PersonDTO::getName, PersonDTO::setName);
+
+        binder.forField(surname)
+                .asRequired("Surname is required")
+                .bind(PersonDTO::getSurname, PersonDTO::setSurname);
+
+        binder.forField(document)
+                .asRequired("Document is required")
+                .bind(PersonDTO::getDocumentId, PersonDTO::setDocumentId);
+
+        binder.bind(birthDate, PersonDTO::getBirthDate, PersonDTO::setBirthDate);
+        binder.bind(email, PersonDTO::getEmail, PersonDTO::setEmail);
+        binder.bind(phone, PersonDTO::getPhone, PersonDTO::setPhone);
+        binder.bind(address, PersonDTO::getAddress, PersonDTO::setAddress);
+
+        /*
+         * LOAD DATA
+         */
+        PersonDTO dto = person != null ? person : new PersonDTO();
+        binder.setBean(dto);
+
+        boolean isEdit = person != null;
+        boolean hasUser = isEdit && person.getUsername() != null;
+
+        if(isEdit){
+            document.setEnabled(false);
+            name.setEnabled(false);
+            surname.setEnabled(false);
         }
+
+        createUserFlag.setVisible(!hasUser);
+        deleteUserFlag.setVisible(hasUser);
+
+        /*
+         * SAVE BUTTON
+         */
+        Button save = new Button("Save", e -> {
+
+            if(!binder.validate().isOk()){
+                return;
+            }
+
+            PersonDTO bean = binder.getBean();
+
+            boolean createUser = createUserFlag.isVisible() && createUserFlag.getValue();
+            boolean deleteUser = deleteUserFlag.isVisible() && deleteUserFlag.getValue();
+
+            personService.savePerson(bean, createUser, deleteUser);
+
+            dialog.close();
+            refreshGrid();
+        });
+
+        VerticalLayout layout = new VerticalLayout(
+                name,
+                surname,
+                birthDate,
+                document,
+                email,
+                phone,
+                address,
+                createUserFlag,
+                deleteUserFlag,
+                save
+        );
+
+        dialog.add(layout);
+
+        return dialog;
     }
 
     @Override
