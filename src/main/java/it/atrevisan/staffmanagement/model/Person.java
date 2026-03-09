@@ -12,7 +12,6 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString
 public class Person extends UpdatableEntity {
 
     @Id

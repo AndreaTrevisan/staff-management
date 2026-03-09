@@ -54,7 +54,7 @@ public class PersonService {
 
         personRepository.save(person);
 
-        log.info("Created Person: {}", person);
+        log.info("Created Person: {}", dto);
     }
 
     @Transactional
@@ -74,7 +74,7 @@ public class PersonService {
 
         personRepository.save(person);
 
-        log.info("Updated Person: {}", person);
+        log.info("Updated Person: {}", dto);
     }
 
     @Transactional
