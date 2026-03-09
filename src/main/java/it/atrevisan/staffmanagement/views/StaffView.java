@@ -1,10 +1,13 @@
 package it.atrevisan.staffmanagement.views;
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
@@ -31,13 +34,50 @@ public class StaffView extends BasicLoggedInView {
 
         Button createBtn = new Button("New Staff", e -> openCreateDialog());
 
-        grid.addColumn(PersonDTO::getName).setHeader("Name").setSortable(true);
-        grid.addColumn(PersonDTO::getSurname).setHeader("Surname").setSortable(true);
-        grid.addColumn(PersonDTO::getDocumentId).setHeader("Document");
-        grid.addColumn(PersonDTO::getEmail).setHeader("Email");
-        grid.addColumn(PersonDTO::getUsername).setHeader("User");
+        grid.addComponentColumn(this::buildActions)
+                .setHeader("Actions")
+                .setAutoWidth(true);
 
-        grid.addComponentColumn(this::buildActions);
+        grid.addColumn(PersonDTO::getDocumentId)
+                .setHeader("Document ID")
+                .setSortable(true)
+                .setAutoWidth(true);
+        grid.addColumn(PersonDTO::getName)
+                .setHeader("Name")
+                .setSortable(true)
+                .setAutoWidth(true);
+        grid.addColumn(PersonDTO::getSurname)
+                .setHeader("Surname")
+                .setSortable(true)
+                .setAutoWidth(true);
+        grid.addColumn(PersonDTO::getBirthDate)
+                .setHeader("Birth Date")
+                .setSortable(true)
+                .setAutoWidth(true);
+        grid.addColumn(PersonDTO::getEmail)
+                .setHeader("Email")
+                .setSortable(true)
+                .setAutoWidth(true);
+        grid.addColumn(PersonDTO::getUsername)
+                .setHeader("User")
+                .setSortable(true)
+                .setAutoWidth(true);
+        grid.addColumn(PersonDTO::getCreatedBy)
+                .setHeader("Created By")
+                .setSortable(true)
+                .setAutoWidth(true);
+        grid.addColumn(PersonDTO::getCreatedTime)
+                .setHeader("Create Time")
+                .setSortable(true)
+                .setAutoWidth(true);
+        grid.addColumn(PersonDTO::getUpdatedBy)
+                .setHeader("Last Updated By")
+                .setSortable(true)
+                .setAutoWidth(true);
+        grid.addColumn(PersonDTO::getUpdatedTime)
+                .setHeader("Last Update Time")
+                .setSortable(true)
+                .setAutoWidth(true);
 
         grid.setSizeFull();
 
@@ -53,14 +93,23 @@ public class StaffView extends BasicLoggedInView {
 
     private HorizontalLayout buildActions(PersonDTO person){
 
-        Button edit = new Button("Edit",
-                e -> openEditDialog(person));
+        Button edit = new Button(new Icon(VaadinIcon.EDIT));
+        edit.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_TERTIARY);
+        edit.getElement().setProperty("title", "Edit");
+        edit.addClickListener(e -> openEditDialog(person));
 
-        Button delete = new Button("Delete",
-                e -> {
-                    personService.deletePerson(person.getDocumentId());
-                    refreshGrid();
-                });
+        Button delete = new Button(new Icon(VaadinIcon.TRASH));
+        delete.addThemeVariants(
+                ButtonVariant.LUMO_ICON,
+                ButtonVariant.LUMO_ERROR,
+                ButtonVariant.LUMO_TERTIARY
+        );
+        delete.getElement().setProperty("title", "Delete");
+
+        delete.addClickListener(e -> {
+            personService.deletePerson(person.getDocumentId());
+            refreshGrid();
+        });
 
         return new HorizontalLayout(edit, delete);
     }

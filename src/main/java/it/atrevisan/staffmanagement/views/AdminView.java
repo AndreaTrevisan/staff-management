@@ -57,6 +57,10 @@ public class AdminView extends BasicLoggedInView {
         // GRID
         // =========================
 
+        grid.addComponentColumn(this::buildActionsColumn)
+                .setHeader("Actions")
+                .setAutoWidth(true);
+
         grid.addColumn(UserDTO::getUsername)
                 .setHeader("Username")
                 .setAutoWidth(true)
@@ -104,10 +108,6 @@ public class AdminView extends BasicLoggedInView {
                 .setAutoWidth(true)
                 .setSortable(true)
                 .setComparator(UserDTO::getUpdatedTime);
-
-        grid.addComponentColumn(this::buildActionsColumn)
-                .setHeader("Actions")
-                .setAutoWidth(true);
 
         grid.setSizeFull();
 
