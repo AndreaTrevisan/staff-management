@@ -1,6 +1,7 @@
 package it.atrevisan.staffmanagement.service;
 
 import it.atrevisan.staffmanagement.dto.PersonDTO;
+import it.atrevisan.staffmanagement.enums.Roles;
 import it.atrevisan.staffmanagement.mapper.PersonMapper;
 import it.atrevisan.staffmanagement.model.Person;
 import it.atrevisan.staffmanagement.model.User;
@@ -51,31 +52,6 @@ public class PersonService {
         personRepository.save(person);
     }
 
-//    @Transactional
-//    public void updatePerson(PersonDTO dto){
-//
-//        Person person = personRepository.findByDocumentId(dto.getDocumentId())
-//                .orElseThrow(() -> new RuntimeException("Person not found"));
-//
-//        person.setName(dto.getName());
-//        person.setSurname(dto.getSurname());
-//        person.setBirthDate(dto.getBirthDate());
-//        person.setDocumentId(dto.getDocumentId());
-//        person.setEmail(dto.getEmail());
-//        person.setAddress(dto.getAddress());
-//        person.setPhone(dto.getPhone());
-//
-//        if(dto.getUsername() != null){
-//            User user = userRepository.findByUsername(dto.getUsername())
-//                    .orElse(null);
-//            person.setUser(user);
-//        }else{
-//            person.setUser(null);
-//        }
-//
-//        personRepository.save(person);
-//    }
-
     @Transactional
     public void updatePerson(PersonDTO dto){
 
@@ -110,18 +86,12 @@ public class PersonService {
         Optional<Person> existing = personRepository.findByDocumentId(dto.getDocumentId());
         boolean isCreate = !existing.isPresent();
 
-        /*
-         * CREATE OR UPDATE PERSON
-         */
         if (isCreate) {
             createPerson(dto);
         } else {
             updatePerson(dto);
         }
 
-        /*
-         * USER MANAGEMENT
-         */
         if (createUser && dto.getUsername() == null) {
 
             String username = generateUsername(dto.getName(), dto.getSurname());
@@ -129,7 +99,7 @@ public class PersonService {
             userService.createUser(
                     username,
                     username,
-                    Collections.singleton("STAFF")
+                    Collections.singleton(String.valueOf(Roles.STAFF))
             );
 
             assignUserToPerson(username, dto.getDocumentId());
