@@ -6,6 +6,7 @@ import it.atrevisan.staffmanagement.model.User;
 import it.atrevisan.staffmanagement.repository.PersonRepository;
 import it.atrevisan.staffmanagement.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +16,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -38,12 +40,14 @@ public class UserService {
 
     @Transactional
     public void createUser(String username, String password, Set<String> roles, boolean enabled){
+        log.debug("Creating User [username={}, roles={}, enabled={}]", username, roles, enabled);
         if (!userExists(username)) {
             User user = buildUser(username, password, roles, enabled);
             userRepository.save(user);
         } else {
             throw new IllegalStateException("User already defined");
         }
+        log.info("Created User [username={}, roles={}, enabled={}]", username, roles, enabled);
     }
 
     @Transactional
@@ -71,6 +75,7 @@ public class UserService {
 
     @Transactional
     public void updatePassword(String username, String oldPassword, String newPassword){
+        log.debug("Updating password fo User {}", username);
         Optional<User> oldUser = userRepository.findByUsername(username);
         if(!oldUser.isPresent()){
             throw new IllegalArgumentException("Username does not exist");
@@ -85,6 +90,7 @@ public class UserService {
         user.setPassword(BCrypt.hashpw(newPassword, BCrypt.gensalt()));
 
         userRepository.save(user);
+        log.info("Updated password fo User {}", username);
     }
 
     public List<UserDTO> getAllUsers(){
@@ -93,24 +99,29 @@ public class UserService {
 
     @Transactional
     public void deleteUser(String username) {
+        log.debug("Deleting User {}", username);
         userRepository.deleteByUsername(username);
+        log.info("Deleted User {}", username);
     }
 
     public void toggleUser(String username) {
         userRepository.findByUsername(username)
                 .ifPresent(user -> {
+                    log.debug("Toggling User {}. Enabled initial state {}", username, user.isEnabled());
                     user.setEnabled(!user.isEnabled());
                     userRepository.save(user);
+                    log.info("Toggled User {}. Enabled final state {}", username, user.isEnabled());
                 });
 
     }
 
     public void updateRoles(String username, Set<String> roles) {
-
+        log.debug("Updating Roles for User {}. New roles {}", username, roles);
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         user.setRoles(roles);
         userRepository.save(user);
+        log.debug("Updated Roles for User {}. New roles {}", username, roles);
     }
 }

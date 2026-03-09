@@ -8,6 +8,7 @@ import it.atrevisan.staffmanagement.model.User;
 import it.atrevisan.staffmanagement.repository.PersonRepository;
 import it.atrevisan.staffmanagement.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PersonService {
@@ -34,9 +36,10 @@ public class PersonService {
 
     @Transactional
     public void createPerson(PersonDTO dto) {
+        log.debug("Creating Person: {}", dto);
 
         if(personRepository.existsByDocumentId(dto.getDocumentId())){
-            throw new IllegalStateException("Person already exists");
+            throw new IllegalStateException("Person already exists with documentId " + dto.getDocumentId());
         }
 
         Person person = Person.builder()
@@ -50,10 +53,14 @@ public class PersonService {
                 .build();
 
         personRepository.save(person);
+
+        log.info("Created Person: {}", person);
     }
 
     @Transactional
     public void updatePerson(PersonDTO dto){
+
+        log.debug("Updating Person: {}", dto);
 
         Person person = personRepository.findByDocumentId(dto.getDocumentId())
                 .orElseThrow(() -> new RuntimeException("Person not found"));
@@ -66,23 +73,30 @@ public class PersonService {
         person.setPhone(dto.getPhone());
 
         personRepository.save(person);
+
+        log.info("Updated Person: {}", person);
     }
 
     @Transactional
     public void deletePerson(String documentId){
 
+        log.debug("Deleting Person with documentId: {}", documentId);
+
         userRepository.findByPersonDocumentId(documentId)
                 .ifPresent(user -> {
+                    log.debug("Deleting User {} assigned to Person with documentId: {}", user.getUsername(), documentId);
                     user.setPerson(null);
                     userRepository.save(user);
+                    log.info("Deleted User {} assigned to Person with documentId: {}", user.getUsername(), documentId);
                 });
 
         personRepository.deleteByDocumentId(documentId);
+        log.info("Deleted Person with documentId: {}", documentId);
     }
 
     @Transactional
     public void savePerson(@NotNull PersonDTO dto, boolean createUser, boolean deleteUser) {
-
+        log.debug("Saving Person {} [createUser = {}, deleteUser = {}]", dto, createUser, deleteUser);
         Optional<Person> existing = personRepository.findByDocumentId(dto.getDocumentId());
         boolean isCreate = !existing.isPresent();
 
@@ -106,10 +120,11 @@ public class PersonService {
         }
 
         if (deleteUser && dto.getUsername() != null) {
-
             unassignUserToPerson(dto.getDocumentId());
             userService.deleteUser(dto.getUsername());
         }
+        log.info("Saved Person {} [createUser = {}, deleteUser = {}]", dto, createUser, deleteUser);
+
     }
 
     private String generateUsername(String name, String surname) {
@@ -124,12 +139,14 @@ public class PersonService {
             i++;
         }
 
+        log.info("Username generated from name={} surname={}: {}", name, surname, username);
+
         return username;
     }
 
     @Transactional
     public void assignUserToPerson(@NotNull String username, @NotNull String documentId){
-
+        log.debug("Assigning User {} to Person {}", username, documentId);
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found: " + username));
 
@@ -147,11 +164,12 @@ public class PersonService {
         user.setPerson(person);
 
         userRepository.save(user);
+        log.info("Assigned User {} to Person {}", username, documentId);
     }
 
     @Transactional
     public void unassignUserToPerson(@NotNull String documentId){
-
+        log.debug("Unassigning to Person {}", documentId);
         User user = userRepository.findByPersonDocumentId(documentId)
                 .orElse(null);
 
@@ -160,5 +178,6 @@ public class PersonService {
         user.setPerson(null);
 
         userRepository.save(user);
+        log.info("Unassigned to Person {}", documentId);
     }
 }
