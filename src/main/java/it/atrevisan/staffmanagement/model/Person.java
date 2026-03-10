@@ -4,6 +4,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.Set;
 
 @Entity
 @Table(name = "staff")
@@ -32,5 +33,8 @@ public class Person extends UpdatableEntity {
     @OneToOne(mappedBy = "person")
     @JoinColumn(unique = true)
     private User user;
+
+    @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Contract> contracts;
 
 }

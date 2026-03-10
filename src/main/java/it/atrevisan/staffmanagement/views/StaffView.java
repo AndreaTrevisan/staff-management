@@ -18,6 +18,7 @@ import it.atrevisan.staffmanagement.enums.Roles;
 import it.atrevisan.staffmanagement.service.PersonService;
 import it.atrevisan.staffmanagement.views.config.MainLayout;
 import it.atrevisan.staffmanagement.views.session.BasicLoggedInView;
+import it.atrevisan.staffmanagement.views.utils.NotificationService;
 
 @Route(value = "staff", layout = MainLayout.class)
 public class StaffView extends BasicLoggedInView {
@@ -108,6 +109,7 @@ public class StaffView extends BasicLoggedInView {
 
         delete.addClickListener(e -> {
             personService.deletePerson(person.getDocumentId());
+            NotificationService.showSuccess("Person deleted");
             refreshGrid();
         });
 
@@ -198,7 +200,7 @@ public class StaffView extends BasicLoggedInView {
             boolean deleteUser = deleteUserFlag.isVisible() && deleteUserFlag.getValue();
 
             personService.savePerson(bean, createUser, deleteUser);
-
+            NotificationService.showSuccess("Person saved");
             dialog.close();
             refreshGrid();
         });

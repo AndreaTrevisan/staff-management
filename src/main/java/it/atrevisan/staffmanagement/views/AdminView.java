@@ -20,6 +20,7 @@ import it.atrevisan.staffmanagement.service.UserService;
 import it.atrevisan.staffmanagement.views.config.MainLayout;
 import it.atrevisan.staffmanagement.views.config.Routes;
 import it.atrevisan.staffmanagement.views.session.BasicLoggedInView;
+import it.atrevisan.staffmanagement.views.utils.NotificationService;
 
 import java.util.Collections;
 import java.util.List;
@@ -167,6 +168,7 @@ public class AdminView extends BasicLoggedInView {
 
         deleteBtn.addClickListener(e -> {
             userService.deleteUser(user.getUsername());
+            NotificationService.showSuccess("User deleted");
             refreshGrid();
         });
 
@@ -212,6 +214,8 @@ public class AdminView extends BasicLoggedInView {
                     enabled.getValue()
             );
 
+            NotificationService.showSuccess("User saved");
+
             dialog.close();
             refreshGrid();
         });
@@ -234,6 +238,7 @@ public class AdminView extends BasicLoggedInView {
 
         Button save = new Button("Update", e -> {
             userService.updatePassword(user.getUsername(), user.getPassword(), newPassword.getValue());
+            NotificationService.showSuccess("Password Updated");
             dialog.close();
             refreshGrid();
         });
@@ -251,7 +256,6 @@ public class AdminView extends BasicLoggedInView {
         rolesGroup.setItems(Roles.values());
         rolesGroup.setItemLabelGenerator(Enum::name);
 
-        // Preselezione ruoli attuali
         Set<Roles> currentRoles = user.getRoles().stream()
                 .map(Roles::valueOf)
                 .collect(java.util.stream.Collectors.toSet());
@@ -266,7 +270,7 @@ public class AdminView extends BasicLoggedInView {
                     .collect(java.util.stream.Collectors.toSet());
 
             userService.updateRoles(user.getUsername(), updatedRoles);
-
+            NotificationService.showSuccess("Roles updated");
             dialog.close();
             refreshGrid();
         });
