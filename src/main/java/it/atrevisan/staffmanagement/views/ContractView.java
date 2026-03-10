@@ -62,7 +62,8 @@ public class ContractView extends BasicLoggedInView {
 
         grid.addColumn(ContractDTO::getPersonDocumentId)
                 .setHeader("Person")
-                .setAutoWidth(true);
+                .setAutoWidth(true)
+                .setSortable(true);
 
         grid.addColumn(ContractDTO::getStartDate)
                 .setHeader("Start Date")
@@ -76,11 +77,13 @@ public class ContractView extends BasicLoggedInView {
 
         grid.addColumn(ContractDTO::getJobRole)
                 .setHeader("Job Role")
-                .setAutoWidth(true);
+                .setAutoWidth(true)
+                .setSortable(true);
 
         grid.addColumn(ContractDTO::getLicenseExpiry)
                 .setHeader("License Expiry")
-                .setAutoWidth(true);
+                .setAutoWidth(true)
+                .setSortable(true);
 
 
 
