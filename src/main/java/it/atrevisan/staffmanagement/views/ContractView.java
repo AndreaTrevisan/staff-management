@@ -12,6 +12,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 import it.atrevisan.staffmanagement.dto.ContractDTO;
+import it.atrevisan.staffmanagement.dto.UserDTO;
 import it.atrevisan.staffmanagement.enums.JobRole;
 import it.atrevisan.staffmanagement.enums.Roles;
 import it.atrevisan.staffmanagement.service.ContractService;
@@ -84,6 +85,30 @@ public class ContractView extends BasicLoggedInView {
                 .setHeader("License Expiry")
                 .setAutoWidth(true)
                 .setSortable(true);
+
+        grid.addColumn(ContractDTO::getCreatedBy)
+                .setHeader("Created By")
+                .setAutoWidth(true)
+                .setSortable(true)
+                .setComparator(ContractDTO::getCreatedBy);
+
+        grid.addColumn(ContractDTO::getCreatedTime)
+                .setHeader("Create Time")
+                .setAutoWidth(true)
+                .setSortable(true)
+                .setComparator(ContractDTO::getCreatedTime);
+
+        grid.addColumn(ContractDTO::getUpdatedBy)
+                .setHeader("Last Updated By")
+                .setAutoWidth(true)
+                .setSortable(true)
+                .setComparator(ContractDTO::getUpdatedBy);
+
+        grid.addColumn(ContractDTO::getUpdatedTime)
+                .setHeader("Last Update Time")
+                .setAutoWidth(true)
+                .setSortable(true)
+                .setComparator(ContractDTO::getUpdatedTime);
 
 
 
