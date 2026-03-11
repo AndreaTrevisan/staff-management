@@ -83,7 +83,7 @@ public class UserService {
 
         User user = oldUser.get();
 
-        if(BCrypt.checkpw(oldPassword, user.getPassword())){
+        if(!BCrypt.checkpw(oldPassword, user.getPassword())){
             throw new IllegalArgumentException("Old Password does not match");
         }
 

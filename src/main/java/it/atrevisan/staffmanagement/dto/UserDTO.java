@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
+import java.util.Optional;
 import java.util.Set;
 
 @Getter
@@ -18,4 +19,5 @@ public class UserDTO extends UpdatableDTO {
     private String password;
     private boolean enabled;
     private Set<String> roles;
+    private String personDocumentId;
 }
