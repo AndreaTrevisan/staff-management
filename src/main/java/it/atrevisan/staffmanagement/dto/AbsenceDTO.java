@@ -13,7 +13,7 @@ import java.time.LocalDate;
 @SuperBuilder
 public class AbsenceDTO extends UpdatableDTO {
 
-    private Integer id;
+    private String id;
     private String personDocumentId;
     private LocalDate date;
     private AbsenceReason reason;

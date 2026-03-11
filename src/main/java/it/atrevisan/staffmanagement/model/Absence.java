@@ -16,8 +16,7 @@ import java.time.LocalDate;
 public class Absence extends UpdatableEntity {
 
     @Id
-    @GeneratedValue
-    private Integer id;
+    private String id;
 
     @Column(nullable = false)
     private LocalDate date;

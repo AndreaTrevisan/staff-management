@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -45,6 +46,7 @@ public class AbsenceService {
         }
 
         Absence absence = Absence.builder()
+                .id(generateNewId())
                 .person(person)
                 .date(date)
                 .reason(reason)
@@ -53,9 +55,41 @@ public class AbsenceService {
         absenceRepository.save(absence);
     }
 
-    @Transactional
-    public void deleteAbsence(Integer id){
-        absenceRepository.deleteById(id);
+    private String generateNewId(){
+        String uuid = UUID.randomUUID().toString();
+        while(absenceRepository.existsById(uuid)){
+            uuid = UUID.randomUUID().toString();
+        }
+        return uuid;
     }
 
+    @Transactional
+    public void deleteAbsence(String id){
+        absenceRepository.deleteById(id);
+    }
+    public List<AbsenceDTO> getAbsencesByPerson(String personDocumentId) {
+        return absenceRepository.findByPersonDocumentId(personDocumentId)
+                .stream()
+                .map(AbsenceMapper::map)
+                .collect(Collectors.toList());
+    }
+
+    public List<AbsenceDTO> getAllAbsences() {
+
+        return absenceRepository.findAll()
+                .stream()
+                .map(AbsenceMapper::map)
+                .collect(Collectors.toList());
+    }
+
+    public void updateAbsence(String id, AbsenceDTO dto) {
+
+        Absence absence = absenceRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Absence not found: " + id));
+
+        absence.setDate(dto.getDate());
+        absence.setReason(dto.getReason());
+
+        absenceRepository.save(absence);
+    }
 }

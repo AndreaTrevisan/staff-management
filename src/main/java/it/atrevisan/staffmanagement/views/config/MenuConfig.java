@@ -41,6 +41,13 @@ public class MenuConfig {
             VaadinIcon.CLIPBOARD_TEXT
     );
 
+    public static final MenuItem ABSENCE_ITEM = new MenuItem(
+            Roles.toSet(Roles.ADMIN, Roles.HR),
+            AbsenceView.class,
+            "Absences",
+            VaadinIcon.CLOCK
+    );
+
     public static final MenuItem USER_PROFILE_ITEM = new MenuItem(
             Roles.toSet(Roles.values()),
             UserProfileView.class,
@@ -54,6 +61,7 @@ public class MenuConfig {
             ADMIN_ITEM,
             STAFF_ITEM,
             CONTRACT_ITEM,
+            ABSENCE_ITEM,
             CALENDAR_ITEM
     };
 }

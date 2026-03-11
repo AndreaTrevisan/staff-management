@@ -8,4 +8,5 @@ public class Routes {
     public static final String CALENDAR = "calendar";
     public static final String STAFF = "staff";
     public static final String CONTRACTS = "contracts";
+    public static final String ABSENCES = "absences";
 }

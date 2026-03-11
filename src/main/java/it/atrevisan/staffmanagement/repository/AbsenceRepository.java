@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface AbsenceRepository extends JpaRepository<Absence, Integer> {
+public interface AbsenceRepository extends JpaRepository<Absence, String> {
 
     List<Absence> findByPersonDocumentId(String documentId);
 

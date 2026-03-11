@@ -1,6 +1,5 @@
 package it.atrevisan.staffmanagement.views;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -14,28 +13,32 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouteParameters;
 import it.atrevisan.staffmanagement.dto.PersonDTO;
 import it.atrevisan.staffmanagement.enums.Roles;
+import it.atrevisan.staffmanagement.service.AbsenceService;
 import it.atrevisan.staffmanagement.service.ContractService;
 import it.atrevisan.staffmanagement.service.PersonService;
+import it.atrevisan.staffmanagement.views.components.AbsenceGridComponent;
 import it.atrevisan.staffmanagement.views.components.ContractGridComponent;
 import it.atrevisan.staffmanagement.views.config.MainLayout;
+import it.atrevisan.staffmanagement.views.config.Routes;
 import it.atrevisan.staffmanagement.views.session.BasicLoggedInView;
 import it.atrevisan.staffmanagement.views.utils.NotificationService;
 
-@Route(value = "staff", layout = MainLayout.class)
+@Route(value = Routes.STAFF, layout = MainLayout.class)
 public class StaffView extends BasicLoggedInView {
 
     private final PersonService personService;
     private final ContractService contractService;
+    private final AbsenceService absenceService;
 
     private final Grid<PersonDTO> grid = new Grid<>(PersonDTO.class,false);
 
-    public StaffView(PersonService personService, ContractService contractService) {
+    public StaffView(PersonService personService, ContractService contractService, AbsenceService absenceService) {
 
         this.personService = personService;
         this.contractService = contractService;
+        this.absenceService = absenceService;
 
         setSizeFull();
 
@@ -116,7 +119,7 @@ public class StaffView extends BasicLoggedInView {
         absences.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_TERTIARY);
         absences.getElement().setProperty("title", "Absences");
         absences.addClickListener(e ->
-                UI.getCurrent().navigate("absences/" + person.getDocumentId())
+                openAbsencesDialog(person)
         );
 
         Button delete = new Button(new Icon(VaadinIcon.TRASH));
@@ -134,6 +137,21 @@ public class StaffView extends BasicLoggedInView {
         });
 
         return new HorizontalLayout(edit, contracts, absences, delete);
+    }
+
+    private void openAbsencesDialog(PersonDTO person){
+
+        Dialog dialog = new Dialog();
+        dialog.setWidth("900px");
+        dialog.setHeight("600px");
+
+        AbsenceGridComponent absences =
+                new AbsenceGridComponent(absenceService, true);
+
+        absences.setPerson(person.getDocumentId());
+
+        dialog.add(absences);
+        dialog.open();
     }
 
     private void openContractsDialog(PersonDTO person){
