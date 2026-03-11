@@ -1,5 +1,6 @@
 package it.atrevisan.staffmanagement.views;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -13,9 +14,12 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouteParameters;
 import it.atrevisan.staffmanagement.dto.PersonDTO;
 import it.atrevisan.staffmanagement.enums.Roles;
+import it.atrevisan.staffmanagement.service.ContractService;
 import it.atrevisan.staffmanagement.service.PersonService;
+import it.atrevisan.staffmanagement.views.components.ContractGridComponent;
 import it.atrevisan.staffmanagement.views.config.MainLayout;
 import it.atrevisan.staffmanagement.views.session.BasicLoggedInView;
 import it.atrevisan.staffmanagement.views.utils.NotificationService;
@@ -24,12 +28,14 @@ import it.atrevisan.staffmanagement.views.utils.NotificationService;
 public class StaffView extends BasicLoggedInView {
 
     private final PersonService personService;
+    private final ContractService contractService;
 
     private final Grid<PersonDTO> grid = new Grid<>(PersonDTO.class,false);
 
-    public StaffView(PersonService personService) {
+    public StaffView(PersonService personService, ContractService contractService) {
 
         this.personService = personService;
+        this.contractService = contractService;
 
         setSizeFull();
 
@@ -99,6 +105,20 @@ public class StaffView extends BasicLoggedInView {
         edit.getElement().setProperty("title", "Edit");
         edit.addClickListener(e -> openEditDialog(person));
 
+        Button contracts = new Button(new Icon(VaadinIcon.FILE_TREE));
+        contracts.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_TERTIARY);
+        contracts.getElement().setProperty("title", "Contracts");
+        contracts.addClickListener(e ->
+                openContractsDialog(person)
+        );
+
+        Button absences = new Button(new Icon(VaadinIcon.CALENDAR));
+        absences.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_TERTIARY);
+        absences.getElement().setProperty("title", "Absences");
+        absences.addClickListener(e ->
+                UI.getCurrent().navigate("absences/" + person.getDocumentId())
+        );
+
         Button delete = new Button(new Icon(VaadinIcon.TRASH));
         delete.addThemeVariants(
                 ButtonVariant.LUMO_ICON,
@@ -113,7 +133,22 @@ public class StaffView extends BasicLoggedInView {
             refreshGrid();
         });
 
-        return new HorizontalLayout(edit, delete);
+        return new HorizontalLayout(edit, contracts, absences, delete);
+    }
+
+    private void openContractsDialog(PersonDTO person){
+
+        Dialog dialog = new Dialog();
+        dialog.setWidth("900px");
+        dialog.setHeight("600px");
+
+        ContractGridComponent contracts =
+                new ContractGridComponent(contractService, true);
+
+        contracts.setPerson(person.getDocumentId());
+
+        dialog.add(contracts);
+        dialog.open();
     }
 
     private void openCreateDialog(){

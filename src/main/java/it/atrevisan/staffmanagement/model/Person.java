@@ -37,4 +37,7 @@ public class Person extends UpdatableEntity {
     @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Contract> contracts;
 
+    @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Absence> absences;
+
 }

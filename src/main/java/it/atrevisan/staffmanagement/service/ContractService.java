@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -98,5 +99,12 @@ public class ContractService {
         if (!overlappingContracts.isEmpty()) {
             throw new IllegalStateException("There is already an active contract for this period");
         }
+    }
+
+    public boolean hasActiveContract(@NotNull Person person, @NotNull LocalDate date) {
+        return !person.getContracts().stream().filter(c ->
+                (c.getStartDate() == null || c.getStartDate().isBefore(date)) &&
+                        (c.getEndDate() == null || c.getEndDate().isAfter(date))
+                ).collect(Collectors.toSet()).isEmpty();
     }
 }
