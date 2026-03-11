@@ -180,4 +180,8 @@ public class PersonService {
         userRepository.save(user);
         log.info("Unassigned to Person {}", documentId);
     }
+
+    public Optional<PersonDTO> getPerson(String documentId) {
+        return personRepository.findByDocumentId(documentId).map(PersonMapper::map);
+    }
 }
