@@ -36,9 +36,9 @@ public class PersonService {
 
     @Transactional
     public void createPerson(PersonDTO dto) {
-        log.debug("Creating Person: {}", dto);
+        log.debug("Creating person [documentId={}]", dto.getDocumentId());
 
-        if(personRepository.existsByDocumentId(dto.getDocumentId())){
+        if (personRepository.existsByDocumentId(dto.getDocumentId())) {
             throw new IllegalStateException("Person already exists with documentId " + dto.getDocumentId());
         }
 
@@ -53,17 +53,15 @@ public class PersonService {
                 .build();
 
         personRepository.save(person);
-
-        log.info("Created Person: {}", dto);
+        log.info("Created person [documentId={}]", dto.getDocumentId());
     }
 
     @Transactional
-    public void updatePerson(PersonDTO dto){
-
-        log.debug("Updating Person: {}", dto);
+    public void updatePerson(PersonDTO dto) {
+        log.debug("Updating person [documentId={}]", dto.getDocumentId());
 
         Person person = personRepository.findByDocumentId(dto.getDocumentId())
-                .orElseThrow(() -> new RuntimeException("Person not found"));
+                .orElseThrow(() -> new IllegalStateException("Person not found: " + dto.getDocumentId()));
 
         person.setName(dto.getName());
         person.setSurname(dto.getSurname());
@@ -73,115 +71,111 @@ public class PersonService {
         person.setPhone(dto.getPhone());
 
         personRepository.save(person);
-
-        log.info("Updated Person: {}", dto);
+        log.info("Updated person [documentId={}]", dto.getDocumentId());
     }
 
     @Transactional
-    public void deletePerson(String documentId){
+    public void deletePerson(String documentId) {
+        log.debug("Deleting person [documentId={}]", documentId);
 
-        log.debug("Deleting Person with documentId: {}", documentId);
+        if (!personRepository.existsByDocumentId(documentId)) {
+            throw new IllegalStateException("Person not found: " + documentId);
+        }
 
-        userRepository.findByPersonDocumentId(documentId)
-                .ifPresent(user -> {
-                    log.debug("Deleting User {} assigned to Person with documentId: {}", user.getUsername(), documentId);
-                    user.setPerson(null);
-                    userRepository.save(user);
-                    log.info("Deleted User {} assigned to Person with documentId: {}", user.getUsername(), documentId);
-                });
+        userRepository.findByPersonDocumentId(documentId).ifPresent(user -> {
+            log.debug("Unassigning user [username={}] from person [documentId={}]", user.getUsername(), documentId);
+            user.setPerson(null);
+            userRepository.save(user);
+        });
 
         personRepository.deleteByDocumentId(documentId);
-        log.info("Deleted Person with documentId: {}", documentId);
+        log.info("Deleted person [documentId={}]", documentId);
     }
 
     @Transactional
     public void savePerson(@NotNull PersonDTO dto, boolean createUser, boolean deleteUser) {
-        log.debug("Saving Person {} [createUser = {}, deleteUser = {}]", dto, createUser, deleteUser);
-        Optional<Person> existing = personRepository.findByDocumentId(dto.getDocumentId());
-        boolean isCreate = !existing.isPresent();
+        log.debug("Saving person [documentId={}, createUser={}, deleteUser={}]",
+                dto.getDocumentId(), createUser, deleteUser);
 
-        if (isCreate) {
+        Optional<Person> existing = personRepository.findByDocumentId(dto.getDocumentId());
+        if (existing.isEmpty()) {
             createPerson(dto);
         } else {
             updatePerson(dto);
         }
 
-        if (createUser && dto.getUsername() == null) {
+        boolean hasUsername = dto.getUsername() != null && !dto.getUsername().isBlank();
 
+        if (createUser && !hasUsername) {
             String username = generateUsername(dto.getName(), dto.getSurname());
-
-            userService.createUser(
-                    username,
-                    username,
-                    Collections.singleton(String.valueOf(Roles.STAFF))
-            );
-
+            userService.createUser(username, username, Collections.singleton(String.valueOf(Roles.STAFF)));
             assignUserToPerson(username, dto.getDocumentId());
         }
 
-        if (deleteUser && dto.getUsername() != null) {
+        if (deleteUser && hasUsername) {
             unassignUserToPerson(dto.getDocumentId());
             userService.deleteUser(dto.getUsername());
         }
-        log.info("Saved Person {} [createUser = {}, deleteUser = {}]", dto, createUser, deleteUser);
 
-    }
-
-    private String generateUsername(String name, String surname) {
-
-        String base = (name + "." + surname).toLowerCase();
-        String username = base;
-
-        int i = 1;
-
-        while (userService.findByUsername(username).isPresent()) {
-            username = base + i;
-            i++;
-        }
-
-        log.info("Username generated from name={} surname={}: {}", name, surname, username);
-
-        return username;
+        log.info("Saved person [documentId={}, createUser={}, deleteUser={}]",
+                dto.getDocumentId(), createUser, deleteUser);
     }
 
     @Transactional
-    public void assignUserToPerson(@NotNull String username, @NotNull String documentId){
-        log.debug("Assigning User {} to Person {}", username, documentId);
+    public void assignUserToPerson(@NotNull String username, @NotNull String documentId) {
+        log.debug("Assigning user [username={}] to person [documentId={}]", username, documentId);
+
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+                .orElseThrow(() -> new IllegalStateException("User not found: " + username));
 
         Person person = personRepository.findByDocumentId(documentId)
-                .orElseThrow(() -> new RuntimeException("Person not found: " + documentId));
+                .orElseThrow(() -> new IllegalStateException("Person not found: " + documentId));
 
-        if(user.getPerson() != null){
+        if (user.getPerson() != null) {
             throw new IllegalStateException("User already assigned to another person");
         }
 
-        if(userRepository.findByPersonDocumentId(documentId).isPresent()){
+        if (userRepository.existsByPersonDocumentId(documentId)) {
             throw new IllegalStateException("Person already has an assigned user");
         }
 
         user.setPerson(person);
-
         userRepository.save(user);
-        log.info("Assigned User {} to Person {}", username, documentId);
+        log.info("Assigned user [username={}] to person [documentId={}]", username, documentId);
     }
 
     @Transactional
-    public void unassignUserToPerson(@NotNull String documentId){
-        log.debug("Unassigning to Person {}", documentId);
-        User user = userRepository.findByPersonDocumentId(documentId)
-                .orElse(null);
+    public void unassignUserToPerson(@NotNull String documentId) {
+        log.debug("Unassigning user from person [documentId={}]", documentId);
 
-        if(user == null) return;
+        User user = userRepository.findByPersonDocumentId(documentId).orElse(null);
+        if (user == null) {
+            return;
+        }
 
         user.setPerson(null);
-
         userRepository.save(user);
-        log.info("Unassigned to Person {}", documentId);
+        log.info("Unassigned user [username={}] from person [documentId={}]", user.getUsername(), documentId);
     }
 
     public Optional<PersonDTO> getPerson(String documentId) {
         return personRepository.findByDocumentId(documentId).map(PersonMapper::map);
+    }
+
+    private String generateUsername(String name, String surname) {
+        String normalizedName = name == null ? "user" : name.trim().replaceAll("\\s+", "");
+        String normalizedSurname = surname == null ? "" : surname.trim().replaceAll("\\s+", "");
+
+        String base = (normalizedName + "." + normalizedSurname).toLowerCase();
+        String username = base;
+        int i = 1;
+
+        while (userService.userExists(username)) {
+            username = base + i;
+            i++;
+        }
+
+        log.debug("Generated username [base={}, username={}]", base, username);
+        return username;
     }
 }
