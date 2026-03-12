@@ -98,13 +98,13 @@ public class PersonService {
                 dto.getDocumentId(), createUser, deleteUser);
 
         Optional<Person> existing = personRepository.findByDocumentId(dto.getDocumentId());
-        if (existing.isEmpty()) {
+        if (!existing.isPresent()) {
             createPerson(dto);
         } else {
             updatePerson(dto);
         }
 
-        boolean hasUsername = dto.getUsername() != null && !dto.getUsername().isBlank();
+        boolean hasUsername = dto.getUsername() != null && !dto.getUsername().isEmpty();
 
         if (createUser && !hasUsername) {
             String username = generateUsername(dto.getName(), dto.getSurname());
