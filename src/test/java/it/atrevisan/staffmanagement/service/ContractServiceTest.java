@@ -13,9 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -108,9 +106,11 @@ class ContractServiceTest {
     void updateContractUpdatesWhenValidExcludingSelfOverlap() {
         Person person = Person.builder().documentId("DOC1").build();
         Contract existing = Contract.builder().id("C1").person(person).startDate(LocalDate.of(2025,1,1)).endDate(LocalDate.of(2025,1,2)).jobRole(JobRole.DOCTOR).build();
+        List<Contract> mockListContracts = new ArrayList<>();
+        mockListContracts.add(existing);
         when(contractRepository.findById("C1")).thenReturn(Optional.of(existing));
         when(contractRepository.findByPersonAndStartDateLessThanEqualAndEndDateGreaterThanEqual(any(Person.class), any(LocalDate.class), any(LocalDate.class)))
-                .thenReturn(Collections.singletonList(existing));
+                .thenReturn(mockListContracts);
 
         ContractDTO dto = ContractDTO.builder().startDate(LocalDate.of(2025, 1, 3)).endDate(LocalDate.of(2025, 2, 1)).jobRole(JobRole.NURSE).build();
         contractService.updateContract("C1", dto);

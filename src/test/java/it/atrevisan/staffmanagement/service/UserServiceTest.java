@@ -6,6 +6,7 @@ import it.atrevisan.staffmanagement.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mindrot.jbcrypt.BCrypt;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -92,14 +93,14 @@ class UserServiceTest {
 
         User disabled = User.builder()
                 .username("disabled")
-                .password("$2a$10$7EqJtq98hPqEX7fNZaFWoOHiNnDx5A5u5Vf3L7hIwrKyYVJZZzK5e")
+                .password(BCrypt.hashpw("password", BCrypt.gensalt()))
                 .enabled(false)
                 .build();
         when(userRepository.findByUsername("disabled")).thenReturn(Optional.of(disabled));
 
         User enabled = User.builder()
                 .username("enabled")
-                .password("$2a$10$7EqJtq98hPqEX7fNZaFWoOHiNnDx5A5u5Vf3L7hIwrKyYVJZZzK5e")
+                .password(BCrypt.hashpw("password", BCrypt.gensalt()))
                 .enabled(true)
                 .build();
         when(userRepository.findByUsername("enabled")).thenReturn(Optional.of(enabled));
@@ -142,7 +143,7 @@ class UserServiceTest {
     void updatePasswordSavesHashedNewPasswordWhenOldMatches() {
         User user = User.builder()
                 .username("mario")
-                .password("$2a$10$7EqJtq98hPqEX7fNZaFWoOHiNnDx5A5u5Vf3L7hIwrKyYVJZZzK5e")
+                .password(BCrypt.hashpw("password", BCrypt.gensalt()))
                 .enabled(true)
                 .build();
         when(userRepository.findByUsername("mario")).thenReturn(Optional.of(user));
